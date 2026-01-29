@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": ["src/main.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignoreDependencies": ["@tailwindcss/typography", "esbuild"],
+  "ignore": ["**/dist/**", "**/node_modules/**"],
+  "vite": true
+}

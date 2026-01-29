@@ -1,0 +1,8 @@
+{
+  "plugins": ["react", "oxc", "eslint", "typescript", "node", "react-perf", "import", "promise"],
+  "rules": {
+    "no-console": "warn",
+    "no-unexpected-multiline": "error",
+    "curly": ["error", "all", "consistent"]
+  }
+}
