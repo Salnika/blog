@@ -2,6 +2,7 @@
 
 :root {
   --font-size: 16px;
+  --offwhite-rgb: 245 241 232;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -185,5 +186,35 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+}
+
+@layer utilities {
+  .text-zinc-100 {
+    color: rgb(var(--offwhite-rgb) / 0.98);
+  }
+
+  .text-zinc-200 {
+    color: rgb(var(--offwhite-rgb) / 0.92);
+  }
+
+  .text-zinc-300 {
+    color: rgb(var(--offwhite-rgb) / 0.82);
+  }
+
+  .text-zinc-400 {
+    color: rgb(var(--offwhite-rgb) / 0.72);
+  }
+
+  .text-zinc-500 {
+    color: rgb(var(--offwhite-rgb) / 0.62);
+  }
+
+  .hover\\:text-zinc-200:hover {
+    color: rgb(var(--offwhite-rgb) / 0.92);
+  }
+
+  .hover\\:text-zinc-300:hover {
+    color: rgb(var(--offwhite-rgb) / 0.82);
   }
 }

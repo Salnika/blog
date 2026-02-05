@@ -83,11 +83,10 @@ function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
   return (
     <div>
       <motion.div
-        className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md transition-colors ${
-          isSelected
-            ? "bg-zinc-700/50 text-white"
-            : "hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
-        }`}
+        className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md transition-colors ${isSelected
+          ? "bg-zinc-700/50 text-white"
+          : "hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
+          }`}
         style={{ paddingLeft: `${level * 12 + 12}px` }}
         onClick={handleClick}
         whileHover={{ x: 2 }}
@@ -160,8 +159,8 @@ export function FileTreeNav() {
         className="p-4 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/30 transition-colors"
         onClick={() => navigate("/")}
       >
-        <h2 className="font-semibold text-zinc-100">Blog</h2>
-        <p className="text-sm text-zinc-500 mt-1">Explorer</p>
+        <h2 className="font-semibold text-zinc-100">Random Things</h2>
+        <p className="text-sm text-zinc-500 mt-1">Archive</p>
       </div>
 
       <div className="p-3 border-b border-zinc-800">
@@ -181,7 +180,7 @@ export function FileTreeNav() {
         {filteredStructure.length > 0 ? (
           filteredStructure.map((node) => <TreeNode key={node.id} node={node} />)
         ) : (
-          <div className="px-4 py-8 text-center text-zinc-500 text-sm">Aucun résultat trouvé</div>
+          <div className="px-4 py-8 text-center text-zinc-500 text-sm">No result</div>
         )}
       </div>
     </div>

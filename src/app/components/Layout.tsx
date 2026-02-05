@@ -4,7 +4,7 @@ import { OrganicBackground } from "@/app/components/OrganicBackground";
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden">
+    <div className="min-h-screen bg-[#0a0e27] text-zinc-100 overflow-hidden">
       <OrganicBackground />
 
       <div className="relative z-10 flex">

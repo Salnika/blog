@@ -14,12 +14,12 @@ export function ArticleView() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-zinc-300 mb-2">Article non trouvé</h2>
+          <h2 className="text-2xl font-semibold text-zinc-300 mb-2">Oups...</h2>
           <button
             onClick={() => navigate("/")}
-            className="text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
           >
-            Retour à l'accueil
+            Go back
           </button>
         </div>
       </div>
@@ -35,12 +35,12 @@ export function ArticleView() {
     >
       {/* Back button */}
       <motion.button
-        className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-8"
+        className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-8 cursor-pointer"
         onClick={() => navigate("/")}
         whileHover={{ x: -4 }}
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Retour aux articles</span>
+        <span>Go back to posts list</span>
       </motion.button>
 
       {/* Header */}
@@ -78,16 +78,6 @@ export function ArticleView() {
         transition={{ delay: 0.3 }}
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
-      </motion.div>
-
-      {/* Divider with animation */}
-      <motion.div
-        className="mt-12 pt-8 border-t border-zinc-800"
-        initial={{ opacity: 0, scaleX: 0 }}
-        animate={{ opacity: 1, scaleX: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-      >
-        <p className="text-zinc-500 text-sm text-center">Merci d'avoir lu cet article</p>
       </motion.div>
     </motion.article>
   );
