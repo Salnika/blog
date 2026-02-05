@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": ["src/main.tsx"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignoreDependencies": ["@tailwindcss/typography", "esbuild"],
+  "ignoreDependencies": ["@tailwindcss/typography", "esbuild", "tw-animate-css"],
   "ignore": ["**/dist/**", "**/node_modules/**"],
   "vite": true
 }

@@ -83,10 +83,11 @@ function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
   return (
     <div>
       <motion.div
-        className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md transition-colors ${isSelected
-          ? "bg-zinc-700/50 text-white"
-          : "hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
-          }`}
+        className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md transition-colors ${
+          isSelected
+            ? "bg-zinc-700/50 text-white"
+            : "hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
+        }`}
         style={{ paddingLeft: `${level * 12 + 12}px` }}
         onClick={handleClick}
         whileHover={{ x: 2 }}
