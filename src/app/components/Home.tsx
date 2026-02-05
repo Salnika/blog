@@ -7,16 +7,16 @@ export function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-6xl mx-auto px-8 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-6xl font-bold mb-12 text-zinc-100">Posts</h1>
+        <h1 className="text-4xl sm:text-6xl font-bold mb-8 sm:mb-12 text-zinc-100">Posts</h1>
 
-        <div className="border-b border-zinc-800 mb-4 pb-2 flex items-center gap-8 text-sm text-zinc-500">
-          <span className="w-32">DATE</span>
+        <div className="border-b border-zinc-800 mb-4 pb-2 flex items-center gap-4 sm:gap-8 text-sm text-zinc-500">
+          <span className="w-24 sm:w-32">DATE</span>
           <span className="flex-1">NAME</span>
         </div>
 
@@ -30,8 +30,8 @@ export function Home() {
               transition={{ delay: index * 0.05 }}
               onClick={() => navigate(`/article/${post.id}`)}
             >
-              <div className="flex items-center gap-8 py-4 px-2">
-                <span className="w-32 text-sm text-zinc-500">{post.date}</span>
+              <div className="flex items-center gap-4 sm:gap-8 py-3 sm:py-4 px-2">
+                <span className="w-24 sm:w-32 text-sm text-zinc-500">{post.date}</span>
                 <span className="flex-1 text-zinc-200 group-hover:text-white transition-colors">
                   {post.title}
                 </span>

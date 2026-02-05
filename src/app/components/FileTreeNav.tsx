@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown, FileText, Folder, Search } from "lucide-react";
+import { ChevronRight, ChevronDown, FileText, Folder, Search, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate, useLocation } from "react-router";
 import { publishedPosts, type Post } from "@/app/data/posts";
@@ -65,7 +65,15 @@ function buildBlogStructure(posts: Post[]): FileNode[] {
   });
 }
 
-function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
+function TreeNode({
+  node,
+  level = 0,
+  onSelectFile,
+}: {
+  node: FileNode;
+  level?: number;
+  onSelectFile?: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(level === 0);
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,6 +83,7 @@ function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
       setIsOpen(!isOpen);
     } else {
       navigate(`/article/${node.id}`);
+      onSelectFile?.();
     }
   };
 
@@ -119,7 +128,12 @@ function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
           transition={{ duration: 0.2 }}
         >
           {node.children.map((child) => (
-            <TreeNode key={child.id} node={child} level={level + 1} />
+            <TreeNode
+              key={child.id}
+              node={child}
+              level={level + 1}
+              onSelectFile={onSelectFile}
+            />
           ))}
         </motion.div>
       )}
@@ -127,7 +141,13 @@ function TreeNode({ node, level = 0 }: { node: FileNode; level?: number }) {
   );
 }
 
-export function FileTreeNav() {
+export function FileTreeNav({
+  mobileOpen,
+  onMobileClose,
+}: {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const blogStructure = buildBlogStructure(publishedPosts);
@@ -154,14 +174,45 @@ export function FileTreeNav() {
 
   const filteredStructure = filterNodes(blogStructure, searchQuery);
 
+  const isMobile = Boolean(onMobileClose);
+  const mobileTransform = mobileOpen ? "translate-x-0" : "-translate-x-full";
+
   return (
-    <div className="w-72 bg-zinc-900/50 border-r border-zinc-800 h-screen overflow-hidden flex flex-col">
+    <div
+      className={[
+        "w-72 bg-zinc-900/50 border-r border-zinc-800 h-screen overflow-hidden flex flex-col",
+        "fixed inset-y-0 left-0 z-40 shadow-2xl transition-transform duration-200 ease-out",
+        mobileTransform,
+        "md:static md:z-auto md:shadow-none md:translate-x-0",
+      ].join(" ")}
+      role="navigation"
+      aria-label="Archives"
+    >
       <div
-        className="p-4 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/30 transition-colors"
-        onClick={() => navigate("/")}
+        className="p-4 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/30 transition-colors flex items-start justify-between gap-3"
+        onClick={() => {
+          navigate("/");
+          onMobileClose?.();
+        }}
       >
-        <h2 className="font-semibold text-zinc-100">Random Things</h2>
-        <p className="text-sm text-zinc-500 mt-1">Archive</p>
+        <div>
+          <h2 className="font-semibold text-zinc-100">Random Things</h2>
+          <p className="text-sm text-zinc-500 mt-1">archives</p>
+        </div>
+
+        {isMobile && (
+          <button
+            type="button"
+            aria-label="Fermer le menu"
+            className="md:hidden mt-0.5 p-1.5 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMobileClose?.();
+            }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       <div className="p-3 border-b border-zinc-800">
@@ -179,7 +230,9 @@ export function FileTreeNav() {
 
       <div className="py-2 flex-1 overflow-y-auto overscroll-none">
         {filteredStructure.length > 0 ? (
-          filteredStructure.map((node) => <TreeNode key={node.id} node={node} />)
+          filteredStructure.map((node) => (
+            <TreeNode key={node.id} node={node} onSelectFile={onMobileClose} />
+          ))
         ) : (
           <div className="px-4 py-8 text-center text-zinc-500 text-sm">No result</div>
         )}
