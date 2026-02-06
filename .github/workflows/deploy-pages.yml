@@ -41,6 +41,7 @@ jobs:
             BASE="/${REPO_NAME}/"
           fi
 
+          bun run sync:post-assets
           bun run fix:esbuild
           bunx --bun vite build --base="${BASE}"
 
