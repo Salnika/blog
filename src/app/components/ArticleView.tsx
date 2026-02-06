@@ -5,6 +5,19 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+function normalizeBaseUrl(baseUrl: string): string {
+  if (!baseUrl) {
+    return "/";
+  }
+  return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+}
+
+function withBaseUrl(url: string): string {
+  const baseUrl = normalizeBaseUrl(import.meta.env.BASE_URL);
+  const clean = url.startsWith("/") ? url.slice(1) : url;
+  return `${baseUrl}${clean}`;
+}
+
 function resolvePostAssetUrl(url: string | undefined): string | undefined {
   if (!url) {
     return url;
@@ -14,15 +27,24 @@ function resolvePostAssetUrl(url: string | undefined): string | undefined {
     url.startsWith("http://") ||
     url.startsWith("https://") ||
     url.startsWith("mailto:") ||
+    url.startsWith("data:") ||
     url.startsWith("#") ||
-    url.startsWith("/")
+    url === "/"
   ) {
     return url;
   }
 
+  if (url.startsWith("/")) {
+    const baseUrl = normalizeBaseUrl(import.meta.env.BASE_URL);
+    if (baseUrl !== "/" && url.startsWith(baseUrl)) {
+      return url;
+    }
+    return withBaseUrl(url);
+  }
+
   const normalized = url.startsWith("./") ? url.slice(2) : url;
   if (normalized.startsWith("assets/")) {
-    return `/post-assets/${normalized.slice("assets/".length)}`;
+    return withBaseUrl(`/post-assets/${normalized.slice("assets/".length)}`);
   }
 
   return url;
