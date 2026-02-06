@@ -6,6 +6,9 @@
 /dist-ssr/
 /*.tsbuildinfo
 
+# Generated static assets (synced from post/)
+/public/post-assets/
+
 # Tooling caches
 /.vite/
 /.cache/

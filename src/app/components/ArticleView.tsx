@@ -5,6 +5,29 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+function resolvePostAssetUrl(url: string | undefined): string | undefined {
+  if (!url) {
+    return url;
+  }
+
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("mailto:") ||
+    url.startsWith("#") ||
+    url.startsWith("/")
+  ) {
+    return url;
+  }
+
+  const normalized = url.startsWith("./") ? url.slice(2) : url;
+  if (normalized.startsWith("assets/")) {
+    return `/post-assets/${normalized.slice("assets/".length)}`;
+  }
+
+  return url;
+}
+
 export function ArticleView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -77,7 +100,15 @@ export function ArticleView() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            img: ({ src, ...props }) => <img src={resolvePostAssetUrl(src)} {...props} />,
+            a: ({ href, ...props }) => <a href={resolvePostAssetUrl(href)} {...props} />,
+          }}
+        >
+          {post.content}
+        </ReactMarkdown>
       </motion.div>
     </motion.article>
   );
