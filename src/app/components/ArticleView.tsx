@@ -4,7 +4,216 @@ import { getPostById } from "@/app/data/posts";
 import { Calendar, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Download } from "lucide-react";
+
+function StlPreviewCard({
+  href,
+  label,
+  downloadName,
+}: {
+  href: string;
+  label: string;
+  downloadName: string;
+}) {
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const containerRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    let animationFrame = 0;
+    let disposed = false;
+    let resizeObserver: ResizeObserver | undefined;
+
+    const run = async () => {
+      try {
+        const three = await import("three");
+        const { STLLoader } = await import("three/examples/jsm/loaders/STLLoader.js");
+
+        const container = containerRef.current;
+        if (!container) {
+          return;
+        }
+
+        const ensureNonZeroSize = async () => {
+          for (let i = 0; i < 10; i += 1) {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            if (width > 0 && height > 0) {
+              return { width, height };
+            }
+            await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+          }
+          return { width: 300, height: 200 };
+        };
+
+        const { width, height } = await ensureNonZeroSize();
+
+        const scene = new three.Scene();
+        scene.background = null;
+
+        const camera = new three.PerspectiveCamera(40, width / height, 0.1, 100);
+        camera.position.set(0, 0.6, 2.2);
+
+        const renderer = new three.WebGLRenderer({
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(width, height);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        const ambient = new three.AmbientLight(0xffffff, 0.55);
+        scene.add(ambient);
+
+        const key = new three.DirectionalLight(0xffffff, 0.9);
+        key.position.set(3, 4, 2);
+        scene.add(key);
+
+        const fill = new three.DirectionalLight(0xffffff, 0.4);
+        fill.position.set(-2, 1, 3);
+        scene.add(fill);
+
+        const loader = new STLLoader();
+
+        const geometry = await new Promise<InstanceType<typeof three.BufferGeometry>>(
+          (resolve, reject) => {
+            loader.load(
+              href,
+              (geo) => resolve(geo as unknown as InstanceType<typeof three.BufferGeometry>),
+              undefined,
+              (err) => reject(err),
+            );
+          },
+        );
+
+        if (disposed) {
+          geometry.dispose();
+          renderer.dispose();
+          return;
+        }
+
+        geometry.computeVertexNormals();
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+
+        const material = new three.MeshStandardMaterial({
+          color: 0xe5e7eb,
+          metalness: 0.15,
+          roughness: 0.55,
+        });
+
+        const mesh = new three.Mesh(geometry, material);
+
+        if (geometry.boundingBox) {
+          const center = new three.Vector3();
+          geometry.boundingBox.getCenter(center);
+          mesh.position.sub(center);
+
+          const size = new three.Vector3();
+          geometry.boundingBox.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
+
+          const radius = geometry.boundingSphere?.radius && geometry.boundingSphere.radius > 0
+            ? geometry.boundingSphere.radius
+            : Math.max(maxDim / 2, 1);
+
+          const fovRad = (camera.fov * Math.PI) / 180;
+          const distance = (radius / Math.sin(fovRad / 2)) * 1.25;
+
+          camera.near = Math.max(radius / 1000, 0.01);
+          camera.far = Math.max(distance + radius * 4, radius * 100);
+          camera.updateProjectionMatrix();
+
+          camera.position.set(0, radius * 0.35, distance);
+          camera.lookAt(0, 0, 0);
+        }
+
+        scene.add(mesh);
+
+        resizeObserver = new ResizeObserver(() => {
+          const nextWidth = container.clientWidth;
+          const nextHeight = container.clientHeight;
+          if (nextWidth <= 0 || nextHeight <= 0) {
+            return;
+          }
+          camera.aspect = nextWidth / nextHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(nextWidth, nextHeight);
+        });
+        resizeObserver.observe(container);
+
+        setStatus("ready");
+
+        const tick = () => {
+          if (disposed) {
+            return;
+          }
+          mesh.rotation.y += 0.008;
+          renderer.render(scene, camera);
+          animationFrame = window.requestAnimationFrame(tick);
+        };
+        tick();
+
+        return () => {
+          disposed = true;
+          window.cancelAnimationFrame(animationFrame);
+          resizeObserver?.disconnect();
+          geometry.dispose();
+          material.dispose();
+          renderer.dispose();
+          container.replaceChildren();
+        };
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to render STL preview:", error);
+        }
+        setStatus("error");
+      }
+    };
+
+    let cleanup: (() => void) | undefined;
+    run()
+      .then((maybeCleanup) => {
+        cleanup = typeof maybeCleanup === "function" ? maybeCleanup : undefined;
+      })
+      .catch(() => setStatus("error"));
+
+    return () => {
+      disposed = true;
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver?.disconnect();
+      cleanup?.();
+    };
+  }, [href]);
+
+  return (
+    <span className="not-prose my-6 block overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/30">
+      <span className="relative block h-56 bg-gradient-to-b from-zinc-900/40 to-zinc-950/40">
+        <span ref={containerRef} className="absolute inset-0 block" />
+        {status !== "ready" && (
+          <span className="absolute inset-0 flex items-center justify-center text-sm text-zinc-400">
+            {status === "loading" ? "Chargement de la preview 3D…" : "Preview 3D indisponible"}
+          </span>
+        )}
+      </span>
+
+      <span className="flex items-center justify-between gap-3 p-4">
+        <a
+          href={href}
+          download={downloadName}
+          className="inline-flex items-center gap-2 rounded-md border border-zinc-700/60 bg-zinc-800/40 px-3 py-2 text-sm text-zinc-100 no-underline hover:bg-zinc-800/60 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          <span className="font-medium">{label}</span>
+        </a>
+        <span className="text-xs text-zinc-500">STL</span>
+      </span>
+    </span>
+  );
+}
 
 function normalizeBaseUrl(baseUrl: string): string {
   if (!baseUrl) {
@@ -217,7 +426,12 @@ export function ArticleView() {
               const resolvedHref = resolvePostAssetUrl(href);
               const clean = resolvedHref ? stripQueryHash(resolvedHref).toLowerCase() : "";
               const isStlDownload = Boolean(resolvedHref) && clean.endsWith(".stl");
-              const filename = (title ?? "").trim() || getFilenameFromUrl(resolvedHref ?? "");
+              const label = getFilenameFromUrl(resolvedHref ?? "") ?? (title ?? "").trim();
+              const downloadName = (title ?? "").trim() || label;
+
+              if (isStlDownload && resolvedHref && label && downloadName) {
+                return <StlPreviewCard href={resolvedHref} label={label} downloadName={downloadName} />;
+              }
 
               return (
                 <a
