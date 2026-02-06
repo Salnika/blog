@@ -6,9 +6,10 @@
   "scripts": {
     "check": "bun run lint && bun run fmt:check && bun run knip",
     "fix:esbuild": "bun scripts/fix-vite-esbuild.mjs",
+    "sync:post-assets": "bun scripts/sync-post-assets.mjs",
     "postinstall": "bun run fix:esbuild",
-    "build": "bun run fix:esbuild && vite build",
-    "dev": "bun run fix:esbuild && vite",
+    "build": "bun run sync:post-assets && bun run fix:esbuild && vite build",
+    "dev": "bun run sync:post-assets && bun run fix:esbuild && vite",
     "lint": "oxlint --format stylish .",
     "lint:fix": "oxlint --fix .",
     "fmt": "oxfmt",
