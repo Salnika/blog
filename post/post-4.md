@@ -1,6 +1,6 @@
 ---
-title: PCB prototype layout
-date: 2026-02-08
+title: Mixer Effect Bypass
+date: 2026-02-021
 tags:
   - Modular
   - synth

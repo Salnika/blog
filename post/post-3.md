@@ -9,7 +9,7 @@ tags:
 
 > Simple PCB Layout editor
 
-![image](./Capture%20d’écran%202026-02-08%20à%2023.40.33.png)
+![image](./assests/Capture%20d’écran%202026-02-08%20à%2023.40.33.png)
 
 <a href="https://github.com/Salnika/diy-pcb-prototype-layout" target="_blank">Github</a>
 
