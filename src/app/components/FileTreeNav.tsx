@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronRight, ChevronDown, FileText, Folder, Search, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate, useLocation } from "react-router";
+import { concave, refractive } from "@hashintel/refractive";
 import { publishedPosts, type Post } from "@/app/data/posts";
 
 interface FileNode {
@@ -10,6 +11,23 @@ interface FileNode {
   children?: FileNode[];
   id: string;
 }
+
+const sidebarRefraction = {
+  radius: 28,
+  blur: 12,
+  bezelWidth: 18,
+  glassThickness: 80,
+  specularOpacity: 1,
+};
+
+const searchRefraction = {
+  radius: 16,
+  blur: 8,
+  bezelWidth: 10,
+  glassThickness: 54,
+  specularOpacity: 1,
+  bezelHeightFn: concave,
+};
 
 function getYearFromDate(date: string): string {
   return date.slice(0, 4);
@@ -90,35 +108,43 @@ function TreeNode({
   const isSelected = node.type === "file" && location.pathname === `/article/${node.id}`;
 
   return (
-    <div>
-      <motion.div
-        className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md transition-colors ${
-          isSelected
-            ? "bg-zinc-700/50 text-white"
-            : "hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
-        }`}
-        style={{ paddingLeft: `${level * 12 + 12}px` }}
-        onClick={handleClick}
-        whileHover={{ x: 2 }}
-        transition={{ duration: 0.15 }}
+    <div className="space-y-1">
+      <div
+        className="group relative overflow-hidden rounded-2xl"
+        style={{ marginLeft: `${level * 12}px` }}
       >
-        {node.type === "folder" ? (
-          <>
-            {isOpen ? (
-              <ChevronDown className="w-4 h-4 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="w-4 h-4 flex-shrink-0" />
-            )}
-            <Folder className="w-4 h-4 flex-shrink-0" />
-          </>
-        ) : (
-          <>
-            <div className="w-4" />
-            <FileText className="w-4 h-4 flex-shrink-0" />
-          </>
-        )}
-        <span className="text-sm truncate">{node.name}</span>
-      </motion.div>
+        <refractive.div
+          refraction={searchRefraction}
+          className="pointer-events-none absolute inset-0 overflow-hidden border border-white/10 bg-white/8 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+        />
+        <motion.button
+          type="button"
+          className={[
+            "relative z-10 flex w-full cursor-pointer items-center gap-2 rounded-2xl px-3 py-1.5 text-left transition-colors",
+            isSelected ? "bg-zinc-700/50 text-white" : "text-zinc-400 hover:text-zinc-100",
+          ].join(" ")}
+          onClick={handleClick}
+          whileHover={{ x: 2 }}
+          transition={{ duration: 0.15 }}
+        >
+          {node.type === "folder" ? (
+            <>
+              {isOpen ? (
+                <ChevronDown className="h-4 w-4 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+              )}
+              <Folder className="h-4 w-4 flex-shrink-0" />
+            </>
+          ) : (
+            <>
+              <div className="w-4" />
+              <FileText className="h-4 w-4 flex-shrink-0" />
+            </>
+          )}
+          <span className="truncate text-sm">{node.name}</span>
+        </motion.button>
+      </div>
 
       {node.type === "folder" && isOpen && node.children && (
         <motion.div
@@ -175,7 +201,7 @@ export function FileTreeNav({
   return (
     <div
       className={[
-        "w-72 bg-zinc-900/50 border-r border-zinc-800 h-screen overflow-hidden flex flex-col",
+        "w-72 h-screen p-3 md:p-4",
         "fixed inset-y-0 left-0 z-40 shadow-2xl transition-transform duration-200 ease-out",
         mobileTransform,
         "md:static md:z-auto md:shadow-none md:translate-x-0",
@@ -183,55 +209,66 @@ export function FileTreeNav({
       role="navigation"
       aria-label="Archives"
     >
-      <div
-        className="p-4 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/30 transition-colors flex items-start justify-between gap-3"
-        onClick={() => {
-          void navigate("/");
-          onMobileClose?.();
-        }}
+      <refractive.div
+        refraction={sidebarRefraction}
+        className="relative flex h-full min-h-0 flex-col overflow-hidden border border-white/10 bg-[#0b1022]/44 text-zinc-100"
       >
-        <div>
-          <h2 className="font-semibold text-zinc-100">Random Things</h2>
-          <p className="text-sm text-zinc-500 mt-1">archives</p>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 via-white/4 to-transparent" />
+
+        <div
+          className="relative flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4 transition-colors hover:bg-white/5"
+          onClick={() => {
+            void navigate("/");
+            onMobileClose?.();
+          }}
+        >
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/70">Archive</p>
+            <h2 className="mt-2 font-semibold text-zinc-50">Random Things</h2>
+            <p className="mt-1 text-sm text-zinc-400">archives</p>
+          </div>
+
+          {isMobile && (
+            <button
+              type="button"
+              aria-label="Fermer le menu"
+              className="mt-0.5 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/8 hover:text-zinc-100 md:hidden"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMobileClose?.();
+              }}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
-        {isMobile && (
-          <button
-            type="button"
-            aria-label="Fermer le menu"
-            className="md:hidden mt-0.5 p-1.5 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMobileClose?.();
-            }}
+        <div className="relative border-b border-white/10 px-3 py-3">
+          <refractive.div
+            refraction={searchRefraction}
+            className="relative overflow-hidden border border-white/10 bg-white/6"
           >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
-      <div className="p-3 border-b border-zinc-800">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Rechercher..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
-          />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-100/55" />
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
+            />
+          </refractive.div>
         </div>
-      </div>
 
-      <div className="py-2 flex-1 overflow-y-auto overscroll-none">
-        {filteredStructure.length > 0 ? (
-          filteredStructure.map((node) => (
-            <TreeNode key={node.id} node={node} onSelectFile={onMobileClose} />
-          ))
-        ) : (
-          <div className="px-4 py-8 text-center text-zinc-500 text-sm">No result</div>
-        )}
-      </div>
+        <div className="relative flex-1 overflow-y-auto overscroll-none px-2 py-2">
+          {filteredStructure.length > 0 ? (
+            filteredStructure.map((node) => (
+              <TreeNode key={node.id} node={node} onSelectFile={onMobileClose} />
+            ))
+          ) : (
+            <div className="px-4 py-8 text-center text-sm text-zinc-400">No result</div>
+          )}
+        </div>
+      </refractive.div>
     </div>
   );
 }

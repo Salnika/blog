@@ -23,6 +23,7 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@hashintel/refractive": "^0.0.3",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",
     "react": "19.2.4",
