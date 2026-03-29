@@ -21,16 +21,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
         with:
-          bun-version: "1.2.16"
+          node-version: "22"
           cache: true
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: vp install
 
-      - name: Build
+      - name: Validate project
+        run: |
+          vp check
+          vp test
+
+      - name: Build pages artifact
         shell: bash
         run: |
           set -euo pipefail
@@ -41,9 +46,7 @@ jobs:
             BASE="/${REPO_NAME}/"
           fi
 
-          bun run sync:post-assets
-          bun run fix:esbuild
-          bunx --bun vite build --base="${BASE}"
+          vp build --base="${BASE}"
 
           # SPA fallback for deep links on GitHub Pages.
           cp dist/index.html dist/404.html

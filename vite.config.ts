@@ -6,6 +6,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:f
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
+const isVitestRuntime = Boolean(process.env.VITEST);
 
 function syncPostAssets() {
   const sourceDir = path.resolve(rootDir, "post", "assets");
@@ -72,9 +73,15 @@ export default defineConfig({
     {
       name: "sync-post-assets",
       buildStart() {
+        if (isVitestRuntime) {
+          return;
+        }
         syncPostAssets();
       },
       configureServer() {
+        if (isVitestRuntime) {
+          return;
+        }
         syncPostAssets();
       },
     },
