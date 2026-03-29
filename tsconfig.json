@@ -13,7 +13,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vite/client"]
+    "types": ["vite-plus/client"]
   },
   "include": ["src", "vite.config.ts"]
 }

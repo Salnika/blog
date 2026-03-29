@@ -4,9 +4,9 @@ This is a code bundle for Design Blog with Dark Theme. The original project is a
 
 ## Running the code
 
-Run `bun install` to install the dependencies.
+Run `vp install` to install the dependencies.
 
-Run `bun run dev` to start the development server.
+Run `vp dev` to start the development server.
 
 ## Posts
 
@@ -20,6 +20,8 @@ The markdown body is the post content.
 
 Quality:
 
-- Lint: `bun run lint` / `bun run lint:fix`
-- Format: `bun run fmt` / `bun run fmt:check`
-- Unused files/exports: `bun run knip`
+- Static checks: `vp check`
+- Lint: `vp lint` / `vp lint --fix`
+- Format: `vp fmt` / `vp fmt --check`
+- Tests: `vp test`
+- Unused files/exports: `vp run knip`

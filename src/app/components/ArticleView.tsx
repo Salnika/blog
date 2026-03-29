@@ -104,7 +104,10 @@ function StlPreviewCard({
           roughness: 0.55,
         });
 
-        const mesh = new three.Mesh(geometry, material);
+        const mesh = new three.Mesh(
+          geometry as unknown as ConstructorParameters<typeof three.Mesh>[0],
+          material,
+        );
 
         if (geometry.boundingBox) {
           const center = new three.Vector3();
@@ -115,9 +118,10 @@ function StlPreviewCard({
           geometry.boundingBox.getSize(size);
           const maxDim = Math.max(size.x, size.y, size.z);
 
-          const radius = geometry.boundingSphere?.radius && geometry.boundingSphere.radius > 0
-            ? geometry.boundingSphere.radius
-            : Math.max(maxDim / 2, 1);
+          const radius =
+            geometry.boundingSphere?.radius && geometry.boundingSphere.radius > 0
+              ? geometry.boundingSphere.radius
+              : Math.max(maxDim / 2, 1);
 
           const fovRad = (camera.fov * Math.PI) / 180;
           const distance = (radius / Math.sin(fovRad / 2)) * 1.25;
@@ -337,7 +341,7 @@ export function ArticleView() {
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-zinc-300 mb-2">Oups...</h2>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => void navigate("/")}
             className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
           >
             Go back
@@ -357,7 +361,7 @@ export function ArticleView() {
       {/* Back button */}
       <motion.button
         className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-8 cursor-pointer"
-        onClick={() => navigate("/")}
+        onClick={() => void navigate("/")}
         whileHover={{ x: -4 }}
       >
         <ArrowLeft className="w-4 h-4" />
@@ -430,7 +434,9 @@ export function ArticleView() {
               const downloadName = (title ?? "").trim() || label;
 
               if (isStlDownload && resolvedHref && label && downloadName) {
-                return <StlPreviewCard href={resolvedHref} label={label} downloadName={downloadName} />;
+                return (
+                  <StlPreviewCard href={resolvedHref} label={label} downloadName={downloadName} />
+                );
               }
 
               return (
@@ -438,7 +444,7 @@ export function ArticleView() {
                   {...props}
                   href={resolvedHref}
                   title={title}
-                  download={isStlDownload ? filename : undefined}
+                  download={isStlDownload ? downloadName : undefined}
                   className={[
                     isStlDownload
                       ? "inline-flex items-center rounded-md border border-zinc-700/60 bg-zinc-800/40 px-3 py-1.5 text-sm text-zinc-100 no-underline hover:bg-zinc-800/60"

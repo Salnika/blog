@@ -82,7 +82,7 @@ function TreeNode({
     if (node.type === "folder") {
       setIsOpen(!isOpen);
     } else {
-      navigate(`/article/${node.id}`);
+      void navigate(`/article/${node.id}`);
       onSelectFile?.();
     }
   };
@@ -128,12 +128,7 @@ function TreeNode({
           transition={{ duration: 0.2 }}
         >
           {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              level={level + 1}
-              onSelectFile={onSelectFile}
-            />
+            <TreeNode key={child.id} node={child} level={level + 1} onSelectFile={onSelectFile} />
           ))}
         </motion.div>
       )}
@@ -191,7 +186,7 @@ export function FileTreeNav({
       <div
         className="p-4 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/30 transition-colors flex items-start justify-between gap-3"
         onClick={() => {
-          navigate("/");
+          void navigate("/");
           onMobileClose?.();
         }}
       >

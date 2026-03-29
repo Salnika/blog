@@ -47,7 +47,7 @@ export function Layout() {
             <button
               type="button"
               className="text-left w-full"
-              onClick={() => navigate("/")}
+              onClick={() => void navigate("/")}
               aria-label="Aller à la page d’accueil"
             >
               <div className="font-semibold text-zinc-100 leading-tight">Random Things</div>
@@ -57,7 +57,7 @@ export function Layout() {
               <button
                 type="button"
                 className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                onClick={() => navigate("/")}
+                onClick={() => void navigate("/")}
               >
                 archives
               </button>

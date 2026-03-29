@@ -1,12 +1,15 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vite-plus";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 function syncPostAssets() {
-  const sourceDir = path.resolve(__dirname, "post", "assets");
-  const destinationDir = path.resolve(__dirname, "public", "post-assets");
+  const sourceDir = path.resolve(rootDir, "post", "assets");
+  const destinationDir = path.resolve(rootDir, "public", "post-assets");
 
   const copyDir = (src: string, dest: string) => {
     mkdirSync(dest, { recursive: true });
@@ -40,6 +43,27 @@ function syncPostAssets() {
 }
 
 export default defineConfig({
+  staged: {
+    "*": "vp check --fix",
+  },
+  fmt: {
+    ignorePatterns: [],
+  },
+  lint: {
+    plugins: ["react", "oxc", "eslint", "typescript", "node", "react-perf", "import", "promise"],
+    rules: {
+      "no-console": "warn",
+      "no-unexpected-multiline": "error",
+      curly: ["error", "all", "consistent"],
+    },
+    options: {
+      typeAware: true,
+      typeCheck: true,
+    },
+  },
+  test: {
+    passWithNoTests: true,
+  },
   plugins: [
     // The React and Tailwind plugins are both required for Make, even if
     // Tailwind is not being actively used – do not remove them
@@ -58,7 +82,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // Alias @ to the src directory
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(rootDir, "./src"),
     },
   },
 });

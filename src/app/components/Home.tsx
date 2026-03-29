@@ -28,7 +28,7 @@ export function Home() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              onClick={() => navigate(`/article/${post.id}`)}
+              onClick={() => void navigate(`/article/${post.id}`)}
             >
               <div className="flex items-center gap-4 sm:gap-8 py-3 sm:py-4 px-2">
                 <span className="w-24 sm:w-32 text-sm text-zinc-500">{post.date}</span>
