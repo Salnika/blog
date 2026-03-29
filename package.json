@@ -5,6 +5,13 @@
   "type": "module",
   "scripts": {
     "check": "vp check",
+    "post:create": "node scripts/post-cli.mjs create",
+    "post:list": "node scripts/post-cli.mjs list",
+    "post:validate": "node scripts/post-cli.mjs validate",
+    "post:publish": "node scripts/post-cli.mjs publish",
+    "post:draft": "node scripts/post-cli.mjs draft",
+    "post:delete": "node scripts/post-cli.mjs delete",
+    "post:migrate-slugs": "node scripts/post-cli.mjs migrate-slugs",
     "sync:post-assets": "node scripts/sync-post-assets.mjs",
     "build": "vp build",
     "dev": "vp dev",
@@ -29,6 +36,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.183.1",

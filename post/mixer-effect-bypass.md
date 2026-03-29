@@ -1,6 +1,6 @@
 ---
 title: Mixer Effect Bypass
-date: 2026-02-021
+date: 2026-02-21
 tags:
   - Modular
   - synth
