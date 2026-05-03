@@ -5,6 +5,6 @@ tags:
   - 3d model
 ---
 
-<a href="./assets/PianoBracket.stl" dowload="PianoBracket.stl">Download Model </a>
+<a href="./assets/PianoBracket.stl" download="PianoBracket.stl">Download Model</a>
 
-<a href="./assets/PIANOBRCKETLONG.stl" dowload="PIANOBRCKETLONG.stl">Download model </a>
+<a href="./assets/PIANOBRACKETLONG.stl" download="PIANOBRACKETLONG.stl">Download model</a>

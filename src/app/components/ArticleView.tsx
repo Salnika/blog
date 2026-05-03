@@ -3,8 +3,9 @@ import { motion } from "motion/react";
 import { getPostById } from "@/app/data/posts";
 import { Calendar, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Children, isValidElement, type ReactNode, useEffect, useRef, useState } from "react";
 import { Download } from "lucide-react";
 
 function StlPreviewCard({
@@ -232,31 +233,6 @@ function withBaseUrl(url: string): string {
   return `${baseUrl}${clean}`;
 }
 
-function normalizeMarkdown(markdown: string): string {
-  return markdown.replace(
-    /<a\s+([^>]*?)>([\s\S]*?)<(?:\/a|a)\s*\/?>/gi,
-    (_match, attrsRaw, inner) => {
-      const attrs = String(attrsRaw ?? "");
-      const hrefMatch = attrs.match(/\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')/i);
-      const href = String(hrefMatch?.[1] ?? hrefMatch?.[2] ?? "").trim();
-      if (!href) {
-        return inner;
-      }
-
-      const downloadMatch = attrs.match(/\b(?:download|dowload)\s*=\s*(?:"([^"]+)"|'([^']+)')/i);
-      const downloadName = String(downloadMatch?.[1] ?? downloadMatch?.[2] ?? "").trim();
-
-      const text = String(inner ?? "")
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      const titleSuffix = downloadName ? ` "${downloadName.replace(/"/g, '\\"')}"` : "";
-      return `[${text || href}](${href}${titleSuffix})`;
-    },
-  );
-}
-
 function resolvePostAssetUrl(url: string | undefined): string | undefined {
   if (!url) {
     return url;
@@ -306,13 +282,30 @@ function getFilenameFromUrl(url: string): string | undefined {
   }
 }
 
+function getTextContent(children: ReactNode): string {
+  return Children.toArray(children)
+    .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
+
+      if (isValidElement<{ children?: ReactNode }>(child)) {
+        return getTextContent(child.props.children);
+      }
+
+      return "";
+    })
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function ArticleView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const post = id ? getPostById(id) : undefined;
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt?: string } | null>(null);
-
-  const content = useMemo(() => normalizeMarkdown(post?.content ?? ""), [post?.content]);
+  const content = post?.content ?? "";
 
   useEffect(() => {
     if (!lightboxImage) {
@@ -403,9 +396,10 @@ export function ArticleView() {
         transition={{ delay: 0.3 }}
       >
         <ReactMarkdown
+          rehypePlugins={[rehypeRaw]}
           remarkPlugins={[remarkGfm]}
           components={{
-            img: ({ src, alt, className, ...props }) => {
+            img: ({ node: _node, src, alt, className, ...props }) => {
               const resolvedSrc = resolvePostAssetUrl(src);
               return (
                 <img
@@ -426,12 +420,42 @@ export function ArticleView() {
                 />
               );
             },
-            a: ({ href, title, className, ...props }) => {
+            iframe: ({ node: _node, className, title, ...props }) => (
+              <div className="not-prose my-6 overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/60">
+                <iframe
+                  {...props}
+                  title={title ?? "Embedded content"}
+                  loading="lazy"
+                  allowFullScreen
+                  className={["block min-h-[320px] w-full border-0 bg-zinc-950", className]
+                    .filter(Boolean)
+                    .join(" ")}
+                />
+              </div>
+            ),
+            script: () => null,
+            a: ({ node: _node, href, title, className, children, ...props }) => {
+              const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+                dowload?: string;
+              };
               const resolvedHref = resolvePostAssetUrl(href);
               const clean = resolvedHref ? stripQueryHash(resolvedHref).toLowerCase() : "";
               const isStlDownload = Boolean(resolvedHref) && clean.endsWith(".stl");
-              const label = getFilenameFromUrl(resolvedHref ?? "") ?? (title ?? "").trim();
-              const downloadName = (title ?? "").trim() || label;
+              const explicitDownloadName =
+                typeof anchorProps.download === "string"
+                  ? anchorProps.download.trim()
+                  : typeof anchorProps.dowload === "string"
+                    ? anchorProps.dowload.trim()
+                    : "";
+              const linkText = getTextContent(children);
+              const filename = getFilenameFromUrl(resolvedHref ?? "");
+              const label = linkText || filename || resolvedHref || "Download";
+              const downloadName = explicitDownloadName || filename || label;
+              const rel =
+                anchorProps.target === "_blank"
+                  ? [anchorProps.rel, "noopener", "noreferrer"].filter(Boolean).join(" ")
+                  : anchorProps.rel;
+              const { dowload: _dowload, ...safeProps } = anchorProps;
 
               if (isStlDownload && resolvedHref && label && downloadName) {
                 return (
@@ -441,10 +465,17 @@ export function ArticleView() {
 
               return (
                 <a
-                  {...props}
+                  {...safeProps}
                   href={resolvedHref}
                   title={title}
-                  download={isStlDownload ? downloadName : undefined}
+                  rel={rel}
+                  download={
+                    isStlDownload
+                      ? downloadName
+                      : typeof anchorProps.download === "string"
+                        ? anchorProps.download
+                        : undefined
+                  }
                   className={[
                     isStlDownload
                       ? "inline-flex items-center rounded-md border border-zinc-700/60 bg-zinc-800/40 px-3 py-1.5 text-sm text-zinc-100 no-underline hover:bg-zinc-800/60"
@@ -453,7 +484,9 @@ export function ArticleView() {
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                />
+                >
+                  {children}
+                </a>
               );
             },
           }}

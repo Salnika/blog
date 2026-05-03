@@ -9,4 +9,4 @@ tags:
 
 > Simple multiple USB alimentation module
 
-<a href="./assets/USBRack.stl" dowload="USBRack.stl">Download Panel </a>
+<a href="./assets/USBRack.stl" download="USBRack.stl">Download Panel</a>

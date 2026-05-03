@@ -19,4 +19,4 @@ Part list:
 
 ![image](./assets/DualAttenuverter.png)
 
-<a href="./assets/AttenuVerter.stl" dowload="panel.stl">Download Panel </a>
+<a href="./assets/AttenuVerter.stl" download="panel.stl">Download Panel</a>
